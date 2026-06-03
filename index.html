@@ -48,6 +48,18 @@ button{cursor:pointer;border:none;font-family:inherit;font-size:inherit}
 .tb-spacer{flex:1}
 .tb-btn{height:34px;padding:0 14px;border-radius:7px;font-size:12px;font-weight:800;transition:filter .15s}
 .tb-btn:hover{filter:brightness(1.1)}
+.tb-ca{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 12px;border-radius:7px;background:var(--s2);border:1px solid var(--border);font-size:11px;transition:border-color .15s}
+.tb-ca:hover{border-color:var(--green)}
+.tb-ca-ticker{color:var(--green);font-weight:800;letter-spacing:.02em;font-size:11px}
+.tb-ca-addr{font-family:'JetBrains Mono','SF Mono',Consolas,monospace;color:var(--sub);font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-ca-copy{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:5px;background:transparent;border:none;color:var(--sub);cursor:pointer;transition:color .15s,background .15s}
+.tb-ca-copy:hover{color:var(--green);background:rgba(61,240,197,.08)}
+.empty-ca{display:inline-flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:8px;background:var(--s2);border:1px solid var(--border);font-size:11px;margin-top:4px}
+.empty-ca-label{color:var(--green);font-weight:800;letter-spacing:.04em}
+.empty-ca-addr{font-family:'JetBrains Mono','SF Mono',Consolas,monospace;color:var(--sub);font-size:11px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty-ca-copy{padding:4px 10px;border-radius:5px;background:rgba(61,240,197,.08);border:1px solid rgba(61,240,197,.25);color:var(--green);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s}
+.empty-ca-copy:hover{background:rgba(61,240,197,.16)}
+@media(max-width:760px){.tb-ca{display:none}.empty-ca-addr{max-width:170px}}
 .tb-blue{background:var(--s2);color:var(--text);border:1px solid var(--border)}
 .tb-pink{background:var(--green);color:#000;display:flex;align-items:center;gap:6px}
 .tb-connected{background:var(--s2)!important;border:1px solid var(--border)!important;color:var(--text)!important;display:flex;align-items:center;gap:6px}
@@ -273,6 +285,13 @@ button{cursor:pointer;border:none;font-family:inherit;font-size:inherit}
         <input type="text" placeholder="Search markets..." id="searchInput" oninput="filterCards()">
       </div>
       <div class="tb-spacer"></div>
+      <div class="tb-ca" title="$PUMPLIQUID contract address">
+        <span class="tb-ca-ticker">$PUMPLIQUID</span>
+        <code class="tb-ca-addr" id="caAddr">uxE4GXWvbqFV5TKogPjyez1XKeU5qh7xoLjCQFWGLQD</code>
+        <button class="tb-ca-copy" id="copyCaBtn" title="Copy contract address" aria-label="Copy contract address">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
       <button class="tb-btn tb-blue" id="walletBtn">Connect Wallet</button>
       <button class="tb-btn tb-pink" onclick="openModal()">
         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
@@ -298,7 +317,12 @@ button{cursor:pointer;border:none;font-family:inherit;font-size:inherit}
       <div class="empty" id="emptyState">
         <div class="empty-icon"><img src="logo.jpg" alt=""></div>
         <h3>No markets yet.</h3>
-        <p>Be the first to launch a permissionless leveraged perp market on any token. Powered by Pumpliquid.</p>
+        <p>Be the first to launch a permissionless leveraged perp market on any token. Powered by <strong>$PUMPLIQUID</strong>.</p>
+        <div class="empty-ca">
+          <span class="empty-ca-label">CA</span>
+          <code class="empty-ca-addr" id="caAddrEmpty">uxE4GXWvbqFV5TKogPjyez1XKeU5qh7xoLjCQFWGLQD</code>
+          <button class="empty-ca-copy" id="copyCaBtnEmpty" title="Copy contract address">Copy</button>
+        </div>
         <button class="empty-btn" onclick="openModal()">Launch the first market →</button>
       </div>
 
@@ -813,6 +837,24 @@ loadMarkets();
 renderMarkets();
 detectWallets();
 updateSummary();
+
+// Copy CA buttons ($PUMPLIQUID contract address)
+const CA_ADDR = 'uxE4GXWvbqFV5TKogPjyez1XKeU5qh7xoLjCQFWGLQD';
+async function copyCA(){
+  try {
+    await navigator.clipboard.writeText(CA_ADDR);
+    toast('Contract address copied','success');
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = CA_ADDR; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Contract address copied','success'); }
+    catch { toast('Copy failed','error'); }
+    document.body.removeChild(ta);
+  }
+}
+document.getElementById('copyCaBtn')?.addEventListener('click', copyCA);
+document.getElementById('copyCaBtnEmpty')?.addEventListener('click', copyCA);
 
 // Try eager reconnect (Phantom "trusted" connection)
 (async ()=>{
